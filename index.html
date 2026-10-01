@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>محفظتي - إدارة المالية الشخصية</title>
+    
+    <!-- PWA Manifest & iOS Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="محفظتي">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- iOS Icon -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS & Chart.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ios: {
+                            bg: '#f2f2f7',
+                            card: '#ffffff',
+                            darkBg: '#000000',
+                            darkCard: '#1c1c1e',
+                            darkCardSecondary: '#2c2c2e',
+                            blue: '#007aff',
+                            green: '#34c759',
+                            red: '#ff3b30',
+                            orange: '#ff9500',
+                            yellow: '#ffcc00',
+                            purple: '#af52de',
+                            teal: '#30b0c7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .pt-safe { padding-top: env(safe-area-inset-top, 44px); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 34px); }
+        .mb-safe { margin-bottom: env(safe-area-inset-bottom, 34px); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .ios-glass {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .dark .ios-glass {
+            background: rgba(28, 28, 30, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .keypad-btn:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="bg-ios-bg dark:bg-ios-darkBg text-slate-900 dark:text-slate-100 h-full w-full overflow-hidden flex flex-col font-sans transition-colors duration-200">
+
+    <!-- PIN Lock Overlay Screen -->
+    <div id="pinOverlay" class="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-white hidden">
+        <div class="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center shadow-lg mb-6">
+            <i class="fa-solid fa-wallet text-3xl text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">تطبيق محفظتي</h2>
+        <p class="text-slate-400 text-sm mb-8">أدخل رمز PIN للوصول إلى بياناتك المالية</p>
+        
+        <div class="flex gap-4 mb-8" id="pinDots">
+            <div class="w-4 h-4 rounded-full border-2 border-slate-500 dot"></div>
+            <div class="w-4 h-4 rounded-full border-2 border-slate-500 dot"></div>
+            <div class="w-4 h-4 rounded-full border-2 border-slate-500 dot"></div>
+            <div class="w-4 h-4 rounded-full border-2 border-slate-500 dot"></div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-5 w-64">
+            <button onclick="enterPin('1')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">1</button>
+            <button onclick="enterPin('2')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">2</button>
+            <button onclick="enterPin('3')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">3</button>
+            <button onclick="enterPin('4')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">4</button>
+            <button onclick="enterPin('5')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">5</button>
+            <button onclick="enterPin('6')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">6</button>
+            <button onclick="enterPin('7')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">7</button>
+            <button onclick="enterPin('8')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">8</button>
+            <button onclick="enterPin('9')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">9</button>
+            <div></div>
+            <button onclick="enterPin('0')" class="keypad-btn w-16 h-16 rounded-full bg-slate-800 text-2xl font-bold flex items-center justify-center border border-slate-700">0</button>
+            <button onclick="clearPin()" class="keypad-btn w-16 h-16 rounded-full bg-red-900/40 text-red-400 text-xl font-bold flex items-center justify-center border border-red-800/50"><i class="fa-solid fa-delete-left"></i></button>
+        </div>
+    </div>
+
+    <!-- Header & App Structure -->
+    <header class="pt-safe sticky top-0 z-30 ios-glass border-b border-slate-200/50 dark:border-slate-800/80 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-md">
+                <i class="fa-solid fa-wallet text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold leading-tight">محفظتي</h1>
+                <p id="currentWalletLabel" class="text-xs text-slate-500 dark:text-slate-400 font-medium">الجميع (إجمالي المحافظ)</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center active:scale-90 transition-transform">
+                <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto no-scrollbar relative pb-28 p-4">
+        <!-- Dashboard Balance Card -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-6 shadow-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-medium">الرصيد الإجمالي الحالي</span>
+                <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full font-semibold border border-emerald-500/30">PWA جاهز</span>
+            </div>
+            <div class="flex items-baseline gap-2 mb-6">
+                <span id="dashNetBalance" class="text-4xl font-black tracking-tight">0.00</span>
+                <span class="text-sm font-bold text-slate-400">د.ل</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- PWA Service Worker Registration Script -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
